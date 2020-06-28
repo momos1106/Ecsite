@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/>
+<title>ECサイト</title>
+<link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet"/>
+<script src="http://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+	<link rel="stylesheet"
+			href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+<script type="text/javascript">
+$(() => {
+	$('#createUserBtn').on('click', () => {
+		let userName = $('input[name=userName]').val();
+		let password =  $('input[name=password]').val();
+		let fullName = $('input[name=fullName]').val();
+		
+		if (userName === "" ){
+			//条件に一致する場合(メールアドレスが空の場合)
+			alert("ユーザーIDを入力してください");    //エラーメッセージを出力
+			return false;
+		} else if (password === ""){
+			//条件に一致する場合(メールアドレスが空の場合)
+			alert("パスワードを入力してください");    //エラーメッセージを出力
+			return false;
+		} else if (fullName === "" ){
+			//条件に一致する場合(メールアドレスが空の場合)
+			alert("フルネームを入力してください");    //エラーメッセージを出力
+			return false;
+		}
+
+		let user = $('input[name=userName]');
+		$.ajax({
+				type: 'POST',
+				url: '/ecsite/toroku/api/duplicatedUserName',
+				data:  user,
+				scriptCharset: 'utf-8'
+		})
+		.then((result) => {
+			if (result) {	// 重複あり
+				alert('ユーザー名が存在するため使用できません。');
+			} else {			// 重複なし
+				let jsonString = {
+						'userName': $('input[name=userName]').val(),
+						'password': $('input[name=password]').val(),
+						'fullName': $('input[name=fullName]').val()
+					};
+				$.ajax({
+					type: 'POST',
+					url: '/ecsite/toroku/api/registeUser',
+					data: JSON.stringify(jsonString),
+					contentType: 'application/json',
+					datatype: 'json',
+					scriptcharset: 'utf-8'
+				})
+				.then((result) => {
+					alert('登録が完了しました。');
+					location.replace('/ecsite/');
+				}, () => {
+					console.error('Error: ajax connection failed.');
+				});
+			}
+		}, () => {
+			alert('Error: ajax connection failed.');
+		});
+	});
+});
+
+</script>
+
+</head>
+<body>
+<header>
+	<h1>My EC Site</h1>
+</header>
+
+<div id="torokuPage">
+	<h2>ユーザー登録</h2>
+	<form name="torokuForm" id="registerForm"  >
+		<p>User name ：<input type="text" name="userName"/></p>
+		<p>Password　：<input type="password" name="password"/></p>
+		<p>Full name　：<input type="text" name="fullName"/></p>
+		<font>
+		<button type="button" id="createUserBtn">登録</button>
+		</font>
+	</form>
+</div>
+
+</body>
+</html>
